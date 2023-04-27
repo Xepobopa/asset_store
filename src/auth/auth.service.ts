@@ -1,5 +1,6 @@
 import {BadRequestException, Injectable} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { Request, Response } from "express";
 import { CreateUserDto } from "../dto/create-user.dto";
 import { UsersService } from "../user/users.service";
 import { TokenDocument } from "../schema/token.schema";
@@ -57,5 +58,35 @@ export class AuthService {
         const user: UserDocument = await this.userService.writeUser(userData);
 
         return {user};
+    }
+
+    async changePassword(refreshToken: string, newPass: string) {
+        const decoded = await this.tokenService.verifyRefreshToken(refreshToken);
+        const user: UserDocument = await this.userService.findOneById(decoded._id);
+        user.password = await bcrypt.hash(newPass, 5);
+        return await user.save();
+    }
+
+    async changeUsername(refreshToken: string, newUsername: string, res: Response) {
+        const decoded = await this.tokenService.verifyRefreshToken(refreshToken);
+        const user: UserDocument = await this.userService.findOneById(decoded._id);
+        user.username = newUsername;
+        await user.save();
+
+        const newTokenPayload = this.tokenService.generateToken(user.toObject());
+        res.cookie('refreshToken', newTokenPayload, {
+            maxAge: 20 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+        });
+
+        return user;
+    }
+
+    getRefreshToken(req: Request) {
+        let refreshToken;
+        if (req && req.cookies) {
+            refreshToken = req.cookies['refreshToken'];
+        }
+        return refreshToken;
     }
 }

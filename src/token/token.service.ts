@@ -25,11 +25,12 @@ export class TokenService {
     }
 
     async findToken(token: string) {
-        return this.tokenModel.findOne({ refresh_token: token }).orFail(new BadRequestException(`Can't find refreshToken in db`));
+        return this.tokenModel.findOne({ refresh_token: token });
     }
 
     generateToken(payload: Partial<UserDto>) {
         const temp_payload = {
+            _id: payload._id.toString(),
             username: payload.username,
             email: payload.email,
             isActivated: payload.isActivated

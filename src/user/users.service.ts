@@ -9,6 +9,7 @@ import * as uuid from 'uuid';
 import { User, UserDocument } from "../schema/user.schema";
 import { CreateUserDto } from "../dto/create-user.dto";
 import { UserNotExistException } from "../exception/user.exception";
+import * as mongoose from "mongoose";
 
 @Injectable()
 export class UsersService {
@@ -31,7 +32,7 @@ export class UsersService {
     }
 
     async findOneById(id: string) {
-        return this.userModel.findOne({ _id: id }).orFail(new Error(`Can't find user by id: ${id}`));
+        return this.userModel.findOne({ _id: new mongoose.Types.ObjectId(id) }).orFail(new Error(`Can't find user by id: ${id}`));
     }
 
     async login(userData: CreateUserDto) {

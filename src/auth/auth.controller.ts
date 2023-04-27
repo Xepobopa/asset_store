@@ -3,6 +3,7 @@ import { AuthService } from "./auth.service";
 import { LocalAuthGuard } from "./guard/local-auth.guard";
 import { Request, Response } from "express";
 import { CreateUserDto } from "../dto/create-user.dto";
+import { ChangePasswordDto } from "../dto/change-password.dto";
 
 @Controller('auth')
 export class AuthController {
@@ -31,11 +32,7 @@ export class AuthController {
     @Get('refresh')
     @HttpCode(HttpStatus.CREATED)
     async refresh(@Req() req: Request) {
-        let refreshToken;
-        if (req && req.cookies) {
-            refreshToken = req.cookies['refreshToken'];
-        }
-        return await this.authService.refresh(refreshToken);
+        return await this.authService.refresh(this.authService.getRefreshToken(req));
     }
 
     @Get('activate/:activationLink')
@@ -43,5 +40,19 @@ export class AuthController {
         console.log(activationLink);
         await this.authService.activate(activationLink);
         res.redirect(HttpStatus.ACCEPTED, 'http:/localhost:5000/activated');
+    }
+
+    @Post('change/password')
+    async changePassword(@Body() newPass: ChangePasswordDto, @Req() req: Request) {
+        return await this.authService.changePassword(this.authService.getRefreshToken(req), newPass.password);
+    }
+
+    @Post('change/username')
+    async changeUsername(@Body('username') newUsername: string, @Req() req: Request, @Res() res: Response) {
+        const newUser =  await this.authService.changeUsername(
+          this.authService.getRefreshToken(req),
+          newUsername, res
+        );
+        res.json(newUser);
     }
 }
