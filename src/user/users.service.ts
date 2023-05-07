@@ -56,4 +56,10 @@ export class UsersService {
             password: await bcrypt.hash(user.password, 5),
         } as User);
     }
+
+    async addAvatar(avatar: Express.Multer.File, id: string) {
+        const user = await this.userModel.findById(id);
+        user.avatar = avatar;
+        return user.save();
+    }
 }

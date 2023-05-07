@@ -4,9 +4,10 @@ import { ValidationPipe } from "@nestjs/common";
 import mongoose from "mongoose";
 import { AppModule } from "./app.module";
 import * as cookieParser from "cookie-parser";
+import { getAuth } from "firebase-admin/lib/auth";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   const config = app.get<ConfigService>(ConfigService);
   mongoose.pluralize(null);
 
