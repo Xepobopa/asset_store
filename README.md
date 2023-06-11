@@ -1,2 +1,2 @@
 # asset_store
-Asset store for Cursed Engine
+Asset store for Omniforce Engine
